@@ -2,6 +2,8 @@ from tkinter import filedialog
 import tkinter as tk
 from tkinter import *
 import os
+import platform
+import subprocess
 
 root = tk.Tk()
 
@@ -36,8 +38,23 @@ def enter_path():
     with open("filepath.txt", "w") as f:
         f.write(text)
 
+
+
 def file_dialog():
-    filepath = filedialog.askdirectory(initialdir, title="Select a Folder")
+    try:
+        if platform.system() == "Windows":
+            initial_dir = os.path.join(os.path.expanduser("~"), "Desktop")
+        elif "microsoft" in platform.uname().release.lower():
+            initial_dir = "/mnt/c/Users"
+        else:
+            initial_dir = os.path.expanduser("~")
+    except Exception as e:
+        print(f"Error finding initial directory: {e}")
+        initial_dir = "/"
+
+    filepath = filedialog.askdirectory(initialdir=initial_dir, title="Select a Folder")
+    print(f"Selected path: {filepath}")
+    return filepath
 
 
 

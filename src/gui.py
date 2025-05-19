@@ -76,14 +76,29 @@ def file_list():
 
     screen_width = process_window.winfo_screenwidth()
     screen_height = process_window.winfo_screenheight()
-    
+
     x = (screen_width / 2) - (pr_w_width / 2)
     y = (screen_height / 2) - (pr_w_height / 2)
 
     process_window.title(f"{filepath}")
     process_window.geometry(f'{pr_w_width}x{pr_w_height}+{int(x)}+{int(y)}')
 
-    listbox = tk.Listbox(process_window, width=70)
+    main_frame = tk.Frame(process_window)
+    main_frame.pack(fill=tk.BOTH, expand=1)
+
+    canvas = tk.Canvas(main_frame)
+    canvas.pack(side=tk.RIGHT, fill=tk.Y)
+    
+    scrollbar = tk.Scrollbar(main_frame, orient=VERTICAL, command=canvas.yview)
+    scrollbar.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+
+    scroll_frame =  tk.Frame(canvas)
+    canvas.create_window((0,0), window= scroll_frame, anchor="nw")
+
+    for idx, image_name in enumerate(list_of_images):
+        image_frame = tk.Frame(scroll_frame, borderwidth=2, relief="ridge", padx=5, pady=5)
+        image_frame.grid(row=idx, column=0, sticky="ew", padx=10, pady=5)
+        
         
 
 

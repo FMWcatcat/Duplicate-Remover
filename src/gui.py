@@ -4,6 +4,7 @@ from tkinter import *
 import os
 import platform
 import subprocess
+from PIL import Image, ImageTk
 
 start_up_window = tk.Tk()
 
@@ -98,8 +99,30 @@ def file_list():
     for idx, image_name in enumerate(list_of_images):
         image_frame = tk.Frame(scroll_frame, borderwidth=2, relief="ridge", padx=5, pady=5)
         image_frame.grid(row=idx, column=0, sticky="ew", padx=10, pady=5)
-        
-        
+
+        try:
+            img_path = os.path.join(filepath, image_name)
+            pil_img = Image.open(img_path)
+            pil_img = pil_img.resize((100,100), Image.LANCZOS)
+
+            tk_img = ImageTk.PhotoImage(pil_img)
+
+            image_frame.image = tk_img
+
+            img_label = tk.label(image_frame, image=tk_img)
+            img_label.pack(side=tk.LEFT, padx=5)
+
+            name_label = tk.label(image_frame, text=image_name, wraplenght=300, anchor="W")
+            name_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
+
+            select_btn = tk.Button(image_frame, text="Select", command=lambda img=image_name: process_image(img))
+            select_btn.pack(side=tk.RIGHT, padx=5)
+
+        except Exception as e:
+            error_label = tk.Label(image_frame, text=f"Error loading {image_name}: {str(e)}")         
+            error_label.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+
+
 
 
 #Initial window

@@ -10,10 +10,19 @@ start_up_window = tk.Tk()
 
 path_var=tk.StringVar()
 
-def select_folder():
-    path = path_var.get()
-    path_var.set('')
+class ImageGallery:
+    def __init__(self):
+        self.start_up_window = start_up_window
+        self.filepath = ""
+        self.filetypes = (".jpg", ".jpeg", ".jpe", ".png")
+        self.all_files = ""
 
+        self.row_height = 120
+        self.buffer = 10
+
+        self.setup_ui()
+        self.list_of_images = []
+        self.image_frames = {}
 
 dr_w_width = 600
 dr_w_height = 150
@@ -28,22 +37,6 @@ y = (screen_height / 2) - (dr_w_height / 2)
 
 start_up_window.geometry(f'{dr_w_width}x{dr_w_height}+{int(x)}+{int(y)}')
 start_up_window.title('Duplicate Remover')
-
-
-#def save_folder_path():
- #   for s in :
-#get([end-1c])
-def clear_text():
-    input_folder_entry.delete(0, "end-1c")
-
-def enter_path():
-    filepath = input_folder_entry.get(0, "end-1c")
-    with open("filepath.txt", "w") as f:
-        f.write(text)
-
-filepath = ""
-filetypes = (".jpg", ".jpeg", ".jpe", ".png")
-all_files = ""
 
 def file_dialog():
     global filepath

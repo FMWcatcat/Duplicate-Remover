@@ -6,7 +6,7 @@ import platform
 import subprocess
 from PIL import Image, ImageTk
 
-start_up_window = tk.Tk()
+
 
 path_var=tk.StringVar()
 
@@ -35,8 +35,32 @@ screen_height = start_up_window.winfo_screenheight()
 x = (screen_width / 2) - (dr_w_width / 2)
 y = (screen_height / 2) - (dr_w_height / 2)
 
-start_up_window.geometry(f'{dr_w_width}x{dr_w_height}+{int(x)}+{int(y)}')
-start_up_window.title('Duplicate Remover')
+def setup_ui(self):
+    self.select_dir_btn = tk.Button(self.root, text="select Directory", command=self.select_directory)
+    self.select_dir_btn.pakc(pady=10)
+
+    self.main_frame = tk.Frame(self.start_up_window)
+    self.main_frame.pack(fill=tk.BOTH, expand=1)
+
+    self.canvas = tk.Canvas(self.main_frame)
+    self.canvas.pack(fill=tk.LEFT, fill=tk.BOTH, expand=1)
+
+    self.scrollbar = tk.Scrollbar(self.main_frame, orient=tk.VERTICAL, command=self.canvas.yview)
+    self.scrollbar.pack(side=tk.RIGHT, fil=tk.Y)
+
+    self.canvas.configure(yscrollcommand=self.scrollbar.set)
+    
+    self.scroll_frame = tk.Frame(self.canvas)
+    self.canvas_window = self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
+    
+    self.canvas.bind('<configure>', self.on_canvas_configure)
+    self.scroll_frame.bind('<configure>', self.on_frame_configure)
+
+    self.root.bind_all()
+    self.root.bind_all("<Button-4>", lambda e:self.canvas.yview_scroll(1, "units"))
+    self.root.bind_all("<Button-5>")
+    
+
 
 def file_dialog():
     global filepath
@@ -139,5 +163,11 @@ input_folder_select.place(x=300, y=90, anchor=CENTER)
 
 
 
+if __name__ == "__main__":
+    start_up_window = tk.Tk()
+    start_up_window.geometry(f'{dr_w_width}x{dr_w_height}+{int(x)}+{int(y)}')
+    start_up_window.title('Duplicate Remover')
 
-start_up_window.mainloop()
+    gallery = ImageGallery(start_up_window)
+
+    start_up_window.mainloop()

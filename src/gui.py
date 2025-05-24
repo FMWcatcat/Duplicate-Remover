@@ -221,7 +221,84 @@ class ImageGallery:
         return color_data
 
 
+    def get_file_size(self, size_in_bytes):
+        for unit in ['B', 'KB', 'MB', 'GB']:
+            if size_in_bytes < 1024.0:
+                return f"{size_in_bytes:.2f} {unit}"
+            size_in_bytes /= 1024.0
+        return f"{size_in_bytes:.2f} TB" 
 
+
+    def save_color_data(self, color_data, data_path):
+        matches = []
+        for img_name in self.list_of_images:
+            if img_name == current_image_name:
+                continue
+
+            try:
+                img_path = os.path.join(self.filepath, img_name)
+                test_img = Image.open(img_path)
+                test_colors = self.sample_image_colors(test_img)
+
+                similarity = self.calculate_color_similarity(color_data, test_colors)
+                if similarity > 0.85:
+                    matches.append((img_name, similarity))
+            except Exception as e:
+                print(f"Error comparing with {img_name}: {e}")
+
+        matches.sort(key=lambda x: x[1], reverse=True)
+        return matches[:3]
+    
+
+    def calculater_color_similarity(self, colors1, colors2):
+        if len(color1) != len(colors2):
+            return 0
+        
+        max_deviation_percent = 0
+        total_deviation_percent = 0
+
+        for i in range(len(colors1)):
+            r1, g1, b1 = colors1[i]
+            r2, g2, b1 = colors2[i]
+
+            max_possible = 255 * math.sqrt(3)
+            distance = math.sqrt((r1-r2)**2 + (g1-g2)**2 + (b1-b2)**2)
+
+            deviation_percent = (distance / max_possible) * 100
+
+            max_deviation_percent = max(max_deviation_percent, deviation_percent)
+            total_deviation_percent += deviation_percent
+        
+        avg_deviation_percent = total_deviation_percent / len(colors1)
+
+        similarity = 1 - (avg_deviation_percent / 100)
+
+        meets_criteria = (max_deviation_percent <= 10 and avg_deviation_percent <= 3)
+            
+        
+        return similarity if meets_criteria else 0
+
+    def load_image(self,idx):
+        if idx >= len(self.list_of_images) or idx < 0:
+            return False
+
+        try:
+            image_name = self.list_of_images[idx]
+            img_path = os.path.join(self.filepath, image_name)
+            pil_img = pil_img.resize((100, 100), Image.LANCZOS)
+            tk_img = ImageTk.PhotoImage(pil_img)
+            tk_img = ImageTk.PhotoImage(pil_img)
+
+            if idx in self.image_frames:
+                self.image_frames[idx].image = tk_img
+                for widget in self.image_frames:
+                    if isinstance(widget, tk.Label) and widget.cget("image") != "":
+                        widget.configure(image=tk_img)
+                        break
+            return True
+        except Exception as e:
+            print(f"Error loading image {idx}: {e}")
+            return False
         
     def process_image(self, image_name):
         try:

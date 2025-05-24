@@ -5,6 +5,7 @@ import os
 import platform
 import subprocess
 from PIL import Image, ImageTk, ImageFilter
+import math
 
 
 
@@ -229,7 +230,7 @@ class ImageGallery:
         return f"{size_in_bytes:.2f} TB" 
 
 
-    def save_color_data(self, color_data, data_path):
+    def save_color_data(self, color_data, data_path, current_image_name):
         matches = []
         for img_name in self.list_of_images:
             if img_name == current_image_name:
@@ -251,7 +252,7 @@ class ImageGallery:
     
 
     def calculater_color_similarity(self, colors1, colors2):
-        if len(color1) != len(colors2):
+        if len(colors1) != len(colors2):
             return 0
         
         max_deviation_percent = 0
@@ -259,7 +260,7 @@ class ImageGallery:
 
         for i in range(len(colors1)):
             r1, g1, b1 = colors1[i]
-            r2, g2, b1 = colors2[i]
+            r2, g2, b2 = colors2[i]
 
             max_possible = 255 * math.sqrt(3)
             distance = math.sqrt((r1-r2)**2 + (g1-g2)**2 + (b1-b2)**2)
@@ -278,6 +279,7 @@ class ImageGallery:
         
         return similarity if meets_criteria else 0
 
+
     def load_image(self,idx):
         if idx >= len(self.list_of_images) or idx < 0:
             return False
@@ -286,7 +288,6 @@ class ImageGallery:
             image_name = self.list_of_images[idx]
             img_path = os.path.join(self.filepath, image_name)
             pil_img = pil_img.resize((100, 100), Image.LANCZOS)
-            tk_img = ImageTk.PhotoImage(pil_img)
             tk_img = ImageTk.PhotoImage(pil_img)
 
             if idx in self.image_frames:
@@ -300,6 +301,7 @@ class ImageGallery:
             print(f"Error loading image {idx}: {e}")
             return False
         
+
     def process_image(self, image_name):
         try:
             img_path = os.path.join(self.filepath, image_name)
@@ -308,7 +310,7 @@ class ImageGallery:
             
             file_size = os.path.getsize(img_path)
             file_type = os.path.splitext(image_name)[1].lower()
-            shown_size = self.get_shown_size(file_size)
+            shown_size = self.get_file_size(file_size)
             
             color_data = self.sample_image_colors(pil_img)
             
@@ -316,7 +318,7 @@ class ImageGallery:
             data_path = os.path.join(self.filepath, data_filename)
             self.save_color_data(color_data, data_path)
             
-            matches = self.find_similar_images(color_data, image_name)
+            matches = self.save_color_data(color_data, image_name)
             
             if matches:
                 self.show_comparison_ui(image_name, img_path, pil_img, shown_size, file_type, matches)

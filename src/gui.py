@@ -54,8 +54,8 @@ class ImageGallery:
         self.scroll_frame = tk.Frame(self.canvas)
         self.canvas_window = self.canvas.create_window((0, 0), window=self.scroll_frame, anchor="nw")
     
-        self.canvas.bind('<configure>', self.on_canvas_configure)
-        self.scroll_frame.bind('<configure>', self.on_frame_configure)
+        self.canvas.bind("<Configure>", self.on_canvas_configure)
+        self.scroll_frame.bind("<Configure>", self.on_frame_configure)
 
         self.root.bind_all("<MouseWheel>", self.on_mousewheel)
         self.root.bind_all("<Button-4>", lambda e: self.canvas.yview_scroll(-1, "units"))
@@ -133,7 +133,7 @@ class ImageGallery:
         scrollbar.pack(side=tk.RIGHT, fill=tk.Y)
         
         self.scroll_frame = tk.Frame(canvas)
-        canvas.bind('<Configure>', lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
+        canvas.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
 
         self.display_images()
 
@@ -251,7 +251,7 @@ class ImageGallery:
         return matches[:3]
     
 
-    def calculater_color_similarity(self, colors1, colors2):
+    def calculate_color_similarity(self, colors1, colors2):
         if len(colors1) != len(colors2):
             return 0
         

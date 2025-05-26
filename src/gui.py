@@ -33,6 +33,9 @@ class ImageGallery:
         self.image_frames = {}
 
         self.loaded_images = set()
+        self.photo_references = {}
+        self.image_labels = {}
+        self.name_labels = {}
 
         
         
@@ -67,7 +70,7 @@ class ImageGallery:
 
 
     def dir_dialog(self):
-  
+
         try:
             if platform.system() == "Windows":
                 initial_dir = os.path.join(os.path.expanduser("~"), "Desktop")
@@ -83,8 +86,9 @@ class ImageGallery:
 
         if self.filepath:
             self.load_image_data()
-            self.create_image_frames()
-            self.load_visible_images()
+            self.display_images()
+            
+    
 
 
     def center_window(self, window, width, height):
@@ -105,6 +109,24 @@ class ImageGallery:
         for f in all_files:
             if f.endswith(self.filetypes):
                 self.list_of_images.append(f)
+
+        self.root.title(f"Image Gallery - {self.filepath}")
+
+
+    def create_image_frames(self):
+        for widget in self.scroll_frame.winfo_children():
+            widget.destroy()
+
+        self.image_frames = {}
+
+        for idx, image_name in enumerate(self.list_of_images):
+            image_frame = tk.Frame(self.scroll_frame, borderwidth=2, relief="ridge",
+                                   padx=5, pady=5, height=self.row_height, width=980)
+            image_frame.grid(row=idx, column=0, sticky="ew", padx=10, pady=5)
+            image_frame.grid_propagate(False)
+            self.image_frames[idx] = image_frame
+
+            self.load_image(idx)
 
 
     def create_process_window(self):
@@ -192,10 +214,10 @@ class ImageGallery:
         end_idx = int(visible_bottom * len(self.list_of_images)) + 1
 
         for idx in range(max(0,start_idx-5), min(len(self.list_of_images), end_idx+5)):
-            if idx not in self.load_image(idx):
-                self.load_image(idx)
-                self.loaded_images.add(idx)
-
+            if idx not in self.loaded_images:
+                success = self.load_image(idx)
+                if success:
+                    self.loaded_images.add(idx)
 
     def sample_image_colors(self, image):
         width, height = image.size
@@ -280,27 +302,34 @@ class ImageGallery:
         return similarity if meets_criteria else 0
 
 
-    def load_image(self,idx):
-        if idx >= len(self.list_of_images) or idx < 0:
-            return False
-
+    def load_image(self, idx):
         try:
             image_name = self.list_of_images[idx]
             img_path = os.path.join(self.filepath, image_name)
+            
+            if not os.path.exists(img_path):
+                print(f"Image path does not exist: {img_path}")
+                return False
+                
+            pil_img = Image.open(img_path)
             pil_img = pil_img.resize((100, 100), Image.LANCZOS)
+            
             tk_img = ImageTk.PhotoImage(pil_img)
+            
+            self.photo_references[idx] = tk_img
 
-            if idx in self.image_frames:
-                self.image_frames[idx].image = tk_img
-                for widget in self.image_frames:
-                    if isinstance(widget, tk.Label) and widget.cget("image") != "":
-                        widget.configure(image=tk_img)
-                        break
+            if idx in self.image_labels:
+                self.image_labels[idx].configure(image=tk_img)
+                self.image_labels[idx].image = tk_img
+                name_label = self.name_labels.get(idx)
+                if name_label:
+                    name_label.configure(text=image_name)
+            
             return True
         except Exception as e:
             print(f"Error loading image {idx}: {e}")
             return False
-        
+
 
     def process_image(self, image_name):
         try:

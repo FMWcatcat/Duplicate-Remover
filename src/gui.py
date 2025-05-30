@@ -121,8 +121,8 @@ class ImageGallery:
 
         for idx, image_name in enumerate(self.list_of_images):
             image_frame = tk.Frame(self.scroll_frame, borderwidth=2, relief="ridge",
-                                   padx=5, pady=5, height=self.row_height, width=980)
-            image_frame.grid(row=idx, column=0, sticky="ew", padx=10, pady=5)
+                                   padx=5, pady=2, height=self.row_height, width=980)
+            image_frame.grid(row=idx, column=0, sticky="ew", padx=10, pady=2)
             image_frame.grid_propagate(False)
             self.image_frames[idx] = image_frame
 
@@ -162,13 +162,13 @@ class ImageGallery:
 
     def display_images(self):
         for idx, image_name in enumerate(self.list_of_images):
-            image_frame = tk.Frame(self.scroll_frame, borderwidth=2, relief="ridge", padx=5, pady=5)
-            image_frame.grid(row=idx, column=0, sticky="ew", padx=10, pady=5)
+            image_frame = tk.Frame(self.scroll_frame, borderwidth=2, relief="ridge", padx=2, pady=2)
+            image_frame.grid(row=idx, column=0, sticky="ew", padx=2, pady=2)
 
             try:
                 img_path = os.path.join(self.filepath, image_name)
                 pil_img = Image.open(img_path)
-                pil_img = pil_img.resize((100,100), Image.LANCZOS)
+                pil_img = pil_img.resize((48,48), Image.LANCZOS)
 
                 tk_img = ImageTk.PhotoImage(pil_img)
 
@@ -177,15 +177,18 @@ class ImageGallery:
                 img_label = tk.Label(image_frame, image=tk_img)
                 img_label.pack(side=tk.LEFT, padx=5)
 
-                name_label = tk.Label(image_frame, text=image_name, wraplenght=300, anchor="W")
+                name_label = tk.Label(image_frame, text=image_name, wraplength=300, anchor="w")
                 name_label.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=10)
 
                 select_btn = tk.Button(image_frame, text="Select", command=lambda img=image_name: self.process_image(img))
                 select_btn.pack(side=tk.RIGHT, padx=5)
 
+
+
             except Exception as e:
                 error_label = tk.Label(image_frame, text=f"Error loading {image_name}: {str(e)}")         
                 error_label.pack(fill=tk.BOTH, expand=True, padx=10, pady=10)
+        self.get_bbox()
 
 
     def on_canvas_configure(self, event):
@@ -195,6 +198,10 @@ class ImageGallery:
     def on_frame_configure(self, event):
         self.canvas.configure(scrollregion=self.canvas.bbox("all"))
 
+
+    def get_bbox(self):
+        bbox = self.scroll_frame.bbox()
+        self.canvas.configure(scrollregion=bbox)
 
     def on_mousewheel(self, event):
         self.canvas.yview_scroll(int(-1*(event.delta/120)), "units")
